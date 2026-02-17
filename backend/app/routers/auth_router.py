@@ -10,7 +10,7 @@ from app.db import get_connection
 from passlib.context import CryptContext
 
 router = APIRouter()
-pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 
 @router.post("/login", response_model=LoginResponse)

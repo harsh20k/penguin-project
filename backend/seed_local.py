@@ -10,7 +10,7 @@ os.environ.setdefault("DB_PATH", str(Path(__file__).resolve().parent / "local.db
 from app.db import init_db, get_connection
 from passlib.context import CryptContext
 
-pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 DEV_USER_ID = "dev-user-00000000-0000-0000-0000-000000000001"
 DEV_EMAIL = "dev@local"
@@ -24,6 +24,7 @@ CAESAR_ROTATION = 7
 def main():
     init_db()
     user_id = DEV_USER_ID
+
     password_hash = pwd_ctx.hash(DEV_PASSWORD)
     answer_hash = pwd_ctx.hash(SECURITY_ANSWER)
 
@@ -53,4 +54,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+main()

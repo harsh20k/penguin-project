@@ -3,7 +3,7 @@ import secrets
 from app.db import get_connection
 from passlib.context import CryptContext
 
-pwd_ctx = CryptContext(schemes=["bcrypt"], deprecated="auto")
+pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 
 def get_question_for_user(user_id: str) -> str | None:
@@ -23,7 +23,7 @@ def verify_answer(user_id: str, answer: str) -> bool:
     conn.close()
     if not row:
         return False
-    # bcrypt verify is constant-time; use it for comparison
+    # sha256_crypt verify is constant-time; use it for comparison
     try:
         return pwd_ctx.verify(answer, row["answer_hash"])
     except Exception:

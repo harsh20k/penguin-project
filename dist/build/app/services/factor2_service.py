@@ -1,30 +1,21 @@
-"""Factor 2: security Q&A – get question, verify answer (hashed, constant-time)."""
-import secrets
-from app.db import get_connection
+"""Factor 2: security Q&A backed by DynamoDB user_mfa table."""
 from passlib.context import CryptContext
+
+from app.aws_integration import get_user_mfa_config
 
 pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 
 def get_question_for_user(user_id: str) -> str | None:
-    conn = get_connection()
-    row = conn.execute(
-        "SELECT question FROM security_qa WHERE user_id = ? LIMIT 1", (user_id,)
-    ).fetchone()
-    conn.close()
-    return row["question"] if row else None
+    cfg = get_user_mfa_config(user_id)
+    return cfg.question if cfg else None
 
 
 def verify_answer(user_id: str, answer: str) -> bool:
-    conn = get_connection()
-    row = conn.execute(
-        "SELECT answer_hash FROM security_qa WHERE user_id = ? LIMIT 1", (user_id,)
-    ).fetchone()
-    conn.close()
-    if not row:
+    cfg = get_user_mfa_config(user_id)
+    if not cfg:
         return False
-    # sha256_crypt verify is constant-time; use it for comparison
     try:
-        return pwd_ctx.verify(answer, row["answer_hash"])
+        return pwd_ctx.verify(answer, cfg.answer_hash)
     except Exception:
         return False

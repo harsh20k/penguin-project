@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth.dependencies import get_session, require_factor1, require_factor2
 from app.auth.stub import issue_token
-from app.models.session import LoginRequest, LoginResponse, SessionResponse
+from app.models.session import LoginRequest, LoginResponse, SessionResponse, SignupRequest
 from app.models.factor2 import Factor2QuestionResponse, Factor2VerifyRequest, Factor2VerifyResponse
 from app.models.factor3 import Factor3ChallengeResponse, Factor3VerifyRequest, Factor3VerifyResponse
 from app.services.session_service import create_session, set_factor2_done, set_factor3_done
@@ -17,22 +17,20 @@ pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 
 @router.post("/signup")
-def signup(
-    email: str,
-    password: str,
-    role: str = "client",
-    question: str = "What is your favorite color?",
-    answer: str = "blue",
-    rotation: int = 7,
-):
+def signup(req: SignupRequest):
     """
     Create a Cognito user and store MFA configuration in DynamoDB.
     """
     try:
+        answer = req.answer or "blue"
+        question = req.question or "What is your favorite color?"
+        role = req.role or "client"
+        rotation = req.rotation or 7
+
         answer_hash = pwd_ctx.hash(answer)
         user_id = signup_user(
-            email=email,
-            password=password,
+            email=req.email,
+            password=req.password,
             role=role,
             question=question,
             answer_hash=answer_hash,

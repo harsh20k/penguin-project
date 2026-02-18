@@ -20,3 +20,12 @@ class LoginResponse(BaseModel):
     token: str
     id_token: str | None = None
     access_token: str | None = None
+
+
+class SignupRequest(BaseModel):
+    email: str
+    password: str
+    role: str | None = "client"
+    question: str | None = "What is your favorite color?"
+    answer: str | None = "blue"
+    rotation: int | None = 7

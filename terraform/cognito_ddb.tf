@@ -42,7 +42,7 @@ resource "aws_cognito_user_pool_client" "spa" {
 }
 
 resource "aws_dynamodb_table" "user_mfa" {
-  name         = ddb_user_table_name
+  name         = local.ddb_user_table_name
   billing_mode = "PAY_PER_REQUEST"
   hash_key     = "user_id"
 

@@ -6,6 +6,9 @@ from app.models.session import LoginRequest, LoginResponse, SessionResponse
 from app.models.factor2 import Factor2QuestionResponse, Factor2VerifyRequest, Factor2VerifyResponse
 from app.models.factor3 import Factor3ChallengeResponse, Factor3VerifyRequest, Factor3VerifyResponse
 from app.services.session_service import create_session, set_factor2_done, set_factor3_done
+from app.services.factor2_service import get_question_for_user, verify_answer
+from app.services.factor3_service import get_or_create_challenge, verify_cipher
+from app.aws_integration import signup_user, cognito_login
 from app.db import get_connection
 from passlib.context import CryptContext
 
@@ -13,23 +16,65 @@ router = APIRouter()
 pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 
+@router.post("/signup")
+def signup(
+    email: str,
+    password: str,
+    role: str = "client",
+    question: str = "What is your favorite color?",
+    answer: str = "blue",
+    rotation: int = 7,
+):
+    """
+    Create a Cognito user and store MFA configuration in DynamoDB.
+    """
+    try:
+        answer_hash = pwd_ctx.hash(answer)
+        user_id = signup_user(
+            email=email,
+            password=password,
+            role=role,
+            question=question,
+            answer_hash=answer_hash,
+            rotation=rotation,
+        )
+    except Exception as exc:  # pragma: no cover - surface AWS errors
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Signup failed: {exc}",
+        ) from exc
+
+    return {"user_id": user_id}
+
+
 @router.post("/login", response_model=LoginResponse)
 def login(req: LoginRequest):
-    """Dev stub: username (email) + password -> session + token."""
-    conn = get_connection()
-    row = conn.execute(
-        "SELECT id, password_hash FROM users WHERE email = ?", (req.username.strip(),)
-    ).fetchone()
-    conn.close()
-    if not row:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
-    user_id = row["id"]
-    password_hash = row["password_hash"]
-    if not password_hash or not pwd_ctx.verify(req.password, password_hash):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+    """
+    Factor 1: username (email) + password via Cognito -> session + token.
+
+    On success, we start a local session keyed by Cognito user and return a
+    dev token that the frontend uses for subsequent factor 2/3 calls.
+    """
+    try:
+        auth_result = cognito_login(req.username.strip(), req.password)
+    except Exception:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+        )
+
+    # For now we treat Cognito access token as opaque and only track that
+    # factor1 succeeded via a local session.
+    # In a fuller implementation we could decode the ID token to get user_id.
+    user_id = req.username.strip()
     session_id = create_session(user_id, factor1_done=True)
     token = issue_token(session_id)
-    return LoginResponse(session_id=session_id, token=token)
+    return LoginResponse(
+        session_id=session_id,
+        token=token,
+        id_token=auth_result.get("IdToken"),
+        access_token=auth_result.get("AccessToken"),
+    )
 
 
 @router.post("/session", response_model=SessionResponse)
@@ -43,7 +88,6 @@ def create_session_endpoint():
 
 @router.get("/factor2/question", response_model=Factor2QuestionResponse)
 def get_factor2_question(session: dict = Depends(require_factor1)):
-    from app.services.factor2_service import get_question_for_user
     user_id = session["user_id"]
     question = get_question_for_user(user_id)
     if not question:
@@ -53,7 +97,6 @@ def get_factor2_question(session: dict = Depends(require_factor1)):
 
 @router.post("/factor2/verify", response_model=Factor2VerifyResponse)
 def verify_factor2(req: Factor2VerifyRequest, session: dict = Depends(require_factor1)):
-    from app.services.factor2_service import verify_answer
     session_id = session["session_id"]
     user_id = session["user_id"]
     if not verify_answer(user_id, req.answer):
@@ -64,7 +107,6 @@ def verify_factor2(req: Factor2VerifyRequest, session: dict = Depends(require_fa
 
 @router.get("/factor3/challenge", response_model=Factor3ChallengeResponse)
 def get_factor3_challenge(session: dict = Depends(require_factor2)):
-    from app.services.factor3_service import get_or_create_challenge
     session_id = session["session_id"]
     user_id = session["user_id"]
     plaintext, rotation = get_or_create_challenge(session_id, user_id)
@@ -73,7 +115,6 @@ def get_factor3_challenge(session: dict = Depends(require_factor2)):
 
 @router.post("/factor3/verify", response_model=Factor3VerifyResponse)
 def verify_factor3(req: Factor3VerifyRequest, session: dict = Depends(require_factor2)):
-    from app.services.factor3_service import verify_cipher
     session_id = session["session_id"]
     if not verify_cipher(session_id, req.ciphertext):
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Invalid cipher answer")

@@ -36,11 +36,11 @@
 ## 2026-02-17
 
 **Two main tasks**
-1. Build front-end sign-up flow: Cognito sign-up + post-sign-up setup (save security Q&A and Caesar config via API).
-2. Build front-end 3-step login: Cognito → Q&A step → Caesar step; pass token and sessionId between steps.
+1. Run local E2E: seed DB, start backend + frontend, complete login → factor2 → factor3 in browser.
+2. Start AWS auth: DynamoDB tables and Cognito User Pool; or implement one Lambda (e.g. session or factor-2).
 
 **Nice-to-do**
-- Add basic error messages and loading states on auth screens.
+- Add a small script or curl examples for the full 3FA flow.
 
 ---
 

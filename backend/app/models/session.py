@@ -18,3 +18,5 @@ class LoginRequest(BaseModel):
 class LoginResponse(BaseModel):
     session_id: str
     token: str
+    id_token: str | None = None
+    access_token: str | None = None

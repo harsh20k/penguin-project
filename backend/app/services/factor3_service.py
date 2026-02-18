@@ -2,8 +2,10 @@
 import random
 import string
 from datetime import datetime
+
 from app.db import get_connection
 from app.services.caesar import caesar_encode, constant_time_compare
+from app.aws_integration import get_user_mfa_config
 
 
 def _random_plaintext(length: int = 8) -> str:
@@ -19,9 +21,9 @@ def get_or_create_challenge(session_id: str, user_id: str) -> tuple[str, int]:
     if row:
         conn.close()
         return row["plaintext"], row["rotation"]
-    # Get user's default rotation or random
-    cfg = conn.execute("SELECT rotation FROM caesar_config WHERE user_id = ?", (user_id,)).fetchone()
-    rotation = cfg["rotation"] if cfg else random.randint(1, 25)
+    # Get user's default rotation from DynamoDB, or random
+    cfg = get_user_mfa_config(user_id)
+    rotation = cfg.rotation if cfg else random.randint(1, 25)
     plaintext = _random_plaintext()
     expected = caesar_encode(plaintext, rotation)
     now = datetime.utcnow().isoformat() + "Z"

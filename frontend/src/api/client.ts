@@ -48,7 +48,11 @@ function authHeaders(token: string): HeadersInit {
 }
 
 export async function login(username: string, password: string): Promise<LoginResponse> {
-  const res = await fetch(`${API_BASE_URL}/auth/login`, {
+  // #region agent log
+  const loginUrl = `${API_BASE_URL}/auth/login`;
+  fetch('http://127.0.0.1:7246/ingest/0766193c-e77a-4db5-8017-843696b02787', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '636235' }, body: JSON.stringify({ sessionId: '636235', location: 'client.ts:login', message: 'login request', data: { apiBaseUrl: API_BASE_URL, fullUrl: loginUrl }, timestamp: Date.now(), hypothesisId: 'A' }) }).catch(() => {});
+  // #endregion
+  const res = await fetch(loginUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -66,7 +70,11 @@ export async function signup(args: {
   answer?: string;
   rotation?: number;
 }): Promise<{ user_id: string }> {
-  const res = await fetch(`${API_BASE_URL}/auth/signup`, {
+  // #region agent log
+  const signupUrl = `${API_BASE_URL}/auth/signup`;
+  fetch('http://127.0.0.1:7246/ingest/0766193c-e77a-4db5-8017-843696b02787', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '636235' }, body: JSON.stringify({ sessionId: '636235', location: 'client.ts:signup', message: 'signup request', data: { apiBaseUrl: API_BASE_URL, fullUrl: signupUrl }, timestamp: Date.now(), hypothesisId: 'A' }) }).catch(() => {});
+  // #endregion
+  const res = await fetch(signupUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -84,7 +92,11 @@ export async function signup(args: {
 }
 
 export async function getFactor2Question(token: string): Promise<Factor2QuestionResponse> {
-  const res = await fetch(`${API_BASE_URL}/auth/factor2/question`, {
+  // #region agent log
+  const factor2Url = `${API_BASE_URL}/auth/factor2/question`;
+  fetch('http://127.0.0.1:7246/ingest/0766193c-e77a-4db5-8017-843696b02787', { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Debug-Session-Id': '636235' }, body: JSON.stringify({ sessionId: '636235', location: 'client.ts:getFactor2Question', message: 'factor2 question request', data: { apiBaseUrl: API_BASE_URL, fullUrl: factor2Url }, timestamp: Date.now(), hypothesisId: 'A' }) }).catch(() => {});
+  // #endregion
+  const res = await fetch(factor2Url, {
     headers: authHeaders(token),
   });
   return handleResponse<Factor2QuestionResponse>(res);

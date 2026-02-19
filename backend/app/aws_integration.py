@@ -126,6 +126,7 @@ def get_user_mfa_config(user_id: str) -> Optional[UserMfaConfig]:
     resp = ddb.get_item(
         TableName=DDB_USER_TABLE_NAME,
         Key={"user_id": {"S": user_id}},
+        ConsistentRead=True,
     )
     item = resp.get("Item")
     if not item:

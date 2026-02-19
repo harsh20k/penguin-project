@@ -4,9 +4,10 @@ import { StepLayout } from './StepLayout';
 
 type LoginFormProps = {
   onLoginSuccess: (args: { sessionId: string; token: string }) => void;
+  onSignupStart?: (data: { email: string; password: string }) => void;
 };
 
-export function LoginForm({ onLoginSuccess }: LoginFormProps) {
+export function LoginForm({ onLoginSuccess, onSignupStart }: LoginFormProps) {
   const [username, setUsername] = useState('dev@local');
   const [password, setPassword] = useState('devpass');
   const [loading, setLoading] = useState(false);
@@ -31,6 +32,10 @@ export function LoginForm({ onLoginSuccess }: LoginFormProps) {
   async function handleSignup(e: FormEvent) {
     e.preventDefault();
     setError(null);
+    if (onSignupStart) {
+      onSignupStart({ email: username, password });
+      return;
+    }
     setSigningUp(true);
     try {
       await signup({

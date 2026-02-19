@@ -1,3 +1,7 @@
+import json
+import time
+from pathlib import Path
+
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth.dependencies import get_session, require_factor1, require_factor2
@@ -8,12 +12,21 @@ from app.models.factor3 import Factor3ChallengeResponse, Factor3VerifyRequest, F
 from app.services.session_service import create_session, set_factor2_done, set_factor3_done
 from app.services.factor2_service import get_question_for_user, verify_answer
 from app.services.factor3_service import get_or_create_challenge, verify_cipher
-from app.aws_integration import signup_user, cognito_login
+from app.aws_integration import signup_user, cognito_login, get_cognito_user_id
 from app.db import get_connection
 from passlib.context import CryptContext
 
 router = APIRouter()
 pwd_ctx = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
+# #region agent log
+_DEBUG_LOG_PATH = Path(__file__).resolve().parents[3] / ".cursor" / "debug-636235.log"
+def _debug_log(loc: str, msg: str, data: dict, hid: str):
+    try:
+        with open(_DEBUG_LOG_PATH, "a") as f:
+            f.write(json.dumps({"sessionId": "636235", "location": loc, "message": msg, "data": data, "timestamp": int(time.time() * 1000), "hypothesisId": hid}) + "\n")
+    except Exception:
+        pass
+# #endregion
 
 
 @router.post("/signup")
@@ -42,6 +55,10 @@ def signup(req: SignupRequest):
             detail=f"Signup failed: {exc}",
         ) from exc
 
+    # #region agent log
+    from app.aws_integration import DDB_USER_TABLE_NAME
+    _debug_log("auth_router.py:signup", "signup stored MFA", {"user_id": user_id, "DDB_USER_TABLE_NAME": DDB_USER_TABLE_NAME or "(none)"}, "B")
+    # #endregion
     return {"user_id": user_id}
 
 
@@ -61,10 +78,8 @@ def login(req: LoginRequest):
             detail="Invalid credentials",
         )
 
-    # For now we treat Cognito access token as opaque and only track that
-    # factor1 succeeded via a local session.
-    # In a fuller implementation we could decode the ID token to get user_id.
-    user_id = req.username.strip()
+    # Use Cognito sub as user_id so factor2/factor3 find MFA data (stored by sub at signup).
+    user_id = get_cognito_user_id(auth_result["AccessToken"])
     session_id = create_session(user_id, factor1_done=True)
     token = issue_token(session_id)
     return LoginResponse(
@@ -88,6 +103,10 @@ def create_session_endpoint():
 def get_factor2_question(session: dict = Depends(require_factor1)):
     user_id = session["user_id"]
     question = get_question_for_user(user_id)
+    # #region agent log
+    from app.aws_integration import DDB_USER_TABLE_NAME as _tbl
+    _debug_log("auth_router.py:get_factor2_question", "factor2 lookup", {"user_id": user_id, "question_found": question is not None, "session_id": session.get("session_id"), "DDB_USER_TABLE_NAME": _tbl or "(none)"}, "B")
+    # #endregion
     if not question:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No security question set")
     return Factor2QuestionResponse(question=question)

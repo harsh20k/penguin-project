@@ -1,7 +1,9 @@
 locals {
-  cognito_user_pool_name = "${var.project_name}-user-pool-${var.environment}"
-  cognito_client_name    = "${var.project_name}-spa-client-${var.environment}"
-  ddb_user_table_name    = "${var.project_name}-users-${var.environment}"
+  cognito_user_pool_name   = "${var.project_name}-user-pool-${var.environment}"
+  cognito_client_name     = "${var.project_name}-spa-client-${var.environment}"
+  ddb_user_table_name     = "${var.project_name}-users-${var.environment}"
+  ddb_token_table_name    = "${var.project_name}-tokens-${var.environment}"
+  ddb_sessions_table_name = "${var.project_name}-sessions-${var.environment}"
 }
 
 resource "aws_cognito_user_pool" "users" {
@@ -52,6 +54,33 @@ resource "aws_dynamodb_table" "user_mfa" {
   }
 }
 
+resource "aws_dynamodb_table" "tokens" {
+  name         = local.ddb_token_table_name
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "token"
+
+  attribute {
+    name = "token"
+    type = "S"
+  }
+
+  ttl {
+    attribute_name = "ttl"
+    enabled        = true
+  }
+}
+
+resource "aws_dynamodb_table" "sessions" {
+  name         = local.ddb_sessions_table_name
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "session_id"
+
+  attribute {
+    name = "session_id"
+    type = "S"
+  }
+}
+
 resource "aws_iam_role_policy" "lambda_auth" {
   name = "${local.lambda_name}-auth-policy"
   role = aws_iam_role.lambda.id
@@ -69,6 +98,24 @@ resource "aws_iam_role_policy" "lambda_auth" {
           "dynamodb:Scan"
         ]
         Resource = aws_dynamodb_table.user_mfa.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:DeleteItem"
+        ]
+        Resource = aws_dynamodb_table.tokens.arn
+      },
+      {
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem"
+        ]
+        Resource = aws_dynamodb_table.sessions.arn
       },
       {
         Effect = "Allow"

@@ -1,1 +1,8 @@
 dist
+.cursor/
+.obsidian/
+.terraform/
+terraform/.terraform/
+*.tfstate
+*.tfstate.*
+terraform/.terraform.lock.hcl

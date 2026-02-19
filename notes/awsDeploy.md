@@ -1,5 +1,7 @@
 ## AWS Deploy & Test – Penguin Auth
 
+The backend is deployed as **seven Lambda functions** (one per route: root, signup, login, factor2/question, factor2/verify, factor3/challenge, factor3/verify). The API surface is unchanged.
+
 - **Prereqs**
   - Terraform ≥ 1.0 installed.
   - AWS CLI configured with credentials and region.

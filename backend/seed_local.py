@@ -18,7 +18,7 @@ DEV_PASSWORD = "devpass"
 DEV_ROLE = "client"
 SECURITY_QUESTION = "What is your favorite color?"
 SECURITY_ANSWER = "blue"
-CAESAR_ROTATION = 7
+CAESAR_ROTATION = 7  # Simulates the key the user chose at registration (1–25)
 
 
 def main():

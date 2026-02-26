@@ -1,4 +1,4 @@
-#!/Users/harsh/Artifacts/Penguin/backend/.venv/bin/python3.14
+#!/Library/Frameworks/Python.framework/Versions/3.10/bin/python3
 
 import sys
 import json

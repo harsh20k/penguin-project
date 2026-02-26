@@ -1,6 +1,6 @@
 ## AWS Deploy & Test – Penguin Auth
 
-The backend is deployed as **seven Lambda functions** (one per route: root, signup, login, factor2/question, factor2/verify, factor3/challenge, factor3/verify). The API surface is unchanged.
+The backend is deployed as **seven Lambda functions** (one per route: root, signup, login, factor2/question, factor2/verify, factor3/challenge, factor3/verify). The zip contains `app/` and `handlers/`; Mangum is not used in the deployed Lambdas. The API surface is unchanged.
 
 - **Prereqs**
   - Terraform ≥ 1.0 installed.
@@ -9,7 +9,7 @@ The backend is deployed as **seven Lambda functions** (one per route: root, sign
 
 - **1. Build Lambda package (from repo root)**
   - `./terraform/scripts/build_lambda.sh`
-  - Produces `dist/penguin-api.zip` used by Terraform.
+  - Produces `dist/penguin-api.zip` (app + handlers + dependencies) used by Terraform for all seven Lambdas.
 
 - **2. Deploy Terraform stack**
   - `cd terraform`

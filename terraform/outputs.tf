@@ -4,13 +4,13 @@ output "api_url" {
 }
 
 output "lambda_arn" {
-  description = "ARN of the Penguin Auth API Lambda function"
-  value       = aws_lambda_function.api.arn
+  description = "ARN of the root Penguin Auth API Lambda function"
+  value       = aws_lambda_function.root.arn
 }
 
 output "lambda_name" {
-  description = "Name of the Lambda function"
-  value       = aws_lambda_function.api.function_name
+  description = "Name of the root Lambda function"
+  value       = aws_lambda_function.root.function_name
 }
 
 output "cognito_user_pool_id" {

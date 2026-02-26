@@ -1,6 +1,6 @@
 # Terraform: Penguin Auth API on AWS Lambda
 
-This directory deploys the Penguin Auth FastAPI backend as a single AWS Lambda behind an API Gateway HTTP API.
+This directory deploys the Penguin Auth backend as **seven AWS Lambda functions** behind an API Gateway HTTP API—one Lambda per route (root, signup, login, factor2/question, factor2/verify, factor3/challenge, factor3/verify). Each handler is a thin wrapper over shared `app` logic; no Mangum or FastAPI in the Lambda runtime.
 
 In the deployed configuration, authentication uses **AWS Cognito + Lambda + DynamoDB**:
 
@@ -22,7 +22,7 @@ In the deployed configuration, authentication uses **AWS Cognito + Lambda + Dyna
    ./terraform/scripts/build_lambda.sh
    ```
 
-   This produces `dist/penguin-api.zip` (app code + dependencies). Terraform expects this file to exist before apply.
+   This produces `dist/penguin-api.zip` (app code, `handlers/` package, and dependencies). All seven Lambdas use this same zip; each is configured with a different handler (e.g. `handlers.root.handler`, `handlers.signup.handler`). Terraform expects the zip to exist before apply.
 
 2. **Initialize and apply** (from this directory):
 
@@ -68,6 +68,10 @@ For production-grade persistence of session/challenge data you could:
 
 - Attach an EFS access point to the Lambda and set `DB_PATH` to the mount path so SQLite uses a persistent file, or
 - Move session/challenge data into DynamoDB and remove SQLite from the Lambda entirely.
+
+## Do not commit `.terraform/`
+
+Run `terraform init` only on your machine. The `.terraform/` directory (including large provider binaries) is in `.gitignore`. Do not remove it from ignore or commit it—GitHub rejects files over 100 MB.
 
 ## Remote state (optional)
 

@@ -15,7 +15,7 @@ cd "${BUILD_DIR}"
 
 # Copy application code
 cp -r "${BACKEND}/app" .
-cp "${BACKEND}/lambda_handler.py" .
+cp -r "${BACKEND}/handlers" .
 
 # Install dependencies for Lambda (Amazon Linux x86_64); avoid host-platform binaries (e.g. pydantic_core on macOS)
 pip install --quiet --target . \
@@ -28,7 +28,7 @@ pip install --quiet --target . \
 find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 find . -name "*.pyc" -delete 2>/dev/null || true
 
-# Zip (contents of BUILD_DIR must be at zip root so handler is lambda_handler.handler)
+# Zip (contents of BUILD_DIR at zip root; handlers are handlers.<name>.handler)
 mkdir -p "${DIST_DIR}"
 cd "${BUILD_DIR}"
 zip -r -q "${DIST_DIR}/${ZIP_NAME}" . -x "*.pyc" -x "*__pycache__*"

@@ -126,8 +126,11 @@ def verify_factor2(req: Factor2VerifyRequest, session: dict = Depends(require_fa
 def get_factor3_challenge(session: dict = Depends(require_factor2)):
     session_id = session["session_id"]
     user_id = session["user_id"]
-    plaintext, rotation = get_or_create_challenge(session_id, user_id)
-    return Factor3ChallengeResponse(plaintext=plaintext, rotation=rotation)
+    try:
+        plaintext = get_or_create_challenge(session_id, user_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(exc))
+    return Factor3ChallengeResponse(plaintext=plaintext)
 
 
 @router.post("/factor3/verify", response_model=Factor3VerifyResponse)

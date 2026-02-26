@@ -1,11 +1,7 @@
 """POST /auth/factor3/verify - require factor2, verify cipher, set factor3 done."""
-from app.db import init_db
 from app.lambda_utils import error_response, get_body_json, require_session, json_response
 from app.services.factor3_service import verify_cipher
 from app.services.session_service import set_factor3_done
-
-# Ensure SQLite tables exist for caesar_challenges (Lambda uses /tmp DB).
-init_db()
 
 
 def handler(event, context):

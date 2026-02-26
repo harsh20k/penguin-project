@@ -5,12 +5,13 @@ locals {
   lambda_name     = "${var.project_name}-api-${var.environment}"
 
   lambda_env = {
-    DB_PATH             = "/tmp/local.db"
-    COGNITO_USER_POOL_ID = aws_cognito_user_pool.users.id
-    COGNITO_CLIENT_ID    = aws_cognito_user_pool_client.spa.id
-    DDB_USER_TABLE_NAME  = aws_dynamodb_table.user_mfa.name
-    TOKEN_TABLE_NAME     = aws_dynamodb_table.tokens.name
-    SESSIONS_TABLE_NAME  = aws_dynamodb_table.sessions.name
+    DB_PATH                  = "/tmp/local.db"
+    COGNITO_USER_POOL_ID     = aws_cognito_user_pool.users.id
+    COGNITO_CLIENT_ID        = aws_cognito_user_pool_client.spa.id
+    DDB_USER_TABLE_NAME      = aws_dynamodb_table.user_mfa.name
+    TOKEN_TABLE_NAME         = aws_dynamodb_table.tokens.name
+    SESSIONS_TABLE_NAME      = aws_dynamodb_table.sessions.name
+    CHALLENGES_TABLE_NAME    = aws_dynamodb_table.challenges.name
   }
 
   lambda_handlers = {

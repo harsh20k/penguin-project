@@ -1,3 +1,0 @@
-{"sessionId":"b36ece","hypothesisId":"E","location":"client.ts:login","message":"login response","data":{"hasToken":true,"tokenLength":43},"timestamp":1771454835715}
-{"sessionId":"b36ece","hypothesisId":"B","location":"client.ts:getFactor2Question","message":"factor2 request","data":{"tokenPresent":true,"tokenLength":43},"timestamp":1771454835727}
-{"sessionId":"b36ece","hypothesisId":"B","location":"client.ts:getFactor2Question","message":"factor2 request","data":{"tokenPresent":true,"tokenLength":43},"timestamp":1771454835741}

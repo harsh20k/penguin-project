@@ -1,6 +1,13 @@
 resource "aws_apigatewayv2_api" "api" {
   name          = "${var.project_name}-api-${var.environment}"
   protocol_type = "HTTP"
+
+  cors_configuration {
+    allow_origins = ["*"]
+    allow_methods = ["GET", "POST", "OPTIONS"]
+    allow_headers = ["content-type", "authorization"]
+    max_age       = 300
+  }
 }
 
 resource "aws_apigatewayv2_integration" "root" {

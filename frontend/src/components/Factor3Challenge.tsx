@@ -2,30 +2,6 @@ import { type FormEvent, useEffect, useState } from 'react';
 import { type Factor3ChallengeResponse, getFactor3Challenge, verifyFactor3 } from '../api/client';
 import { StepLayout } from './StepLayout';
 
-type Factor3ChallengeProps = {
-  token: string;
-  onBackToLogin: () => void;
-  onSuccess: () => void;
-};
-
-function caesarCipher(input: string, rotation: number): string {
-  const shift = ((rotation % 26) + 26) % 26;
-  return Array.from(input)
-    .map((ch) => {
-      const code = ch.charCodeAt(0);
-      if (code >= 65 && code <= 90) {
-        // A-Z
-        return String.fromCharCode(((code - 65 + shift) % 26) + 65);
-      }
-      if (code >= 97 && code <= 122) {
-        // a-z
-        return String.fromCharCode(((code - 97 + shift) % 26) + 97);
-      }
-      return ch;
-    })
-    .join('');
-}
-
 export function Factor3Challenge({ token, onBackToLogin, onSuccess }: Factor3ChallengeProps) {
   const [challenge, setChallenge] = useState<Factor3ChallengeResponse | null>(null);
   const [ciphertext, setCiphertext] = useState('');
@@ -59,12 +35,6 @@ export function Factor3Challenge({ token, onBackToLogin, onSuccess }: Factor3Cha
       cancelled = true;
     };
   }, [token]);
-
-  function handleAutoGenerate() {
-    if (!challenge) return;
-    const generated = caesarCipher(challenge.plaintext, challenge.rotation);
-    setCiphertext(generated);
-  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -126,19 +96,9 @@ export function Factor3Challenge({ token, onBackToLogin, onSuccess }: Factor3Cha
                 required
               />
             </label>
-            <div className="footer-actions">
-              <button
-                type="button"
-                className="button secondary"
-                onClick={handleAutoGenerate}
-                disabled={!challenge}
-              >
-                Auto-generate from plaintext
-              </button>
-              <button className="button primary" type="submit" disabled={submitting}>
-                {submitting ? 'Verifying…' : 'Verify'}
-              </button>
-            </div>
+            <button className="button primary" type="submit" disabled={submitting}>
+              {submitting ? 'Verifying…' : 'Verify'}
+            </button>
             {error && <p className="error-text">{error}</p>}
           </form>
         </>

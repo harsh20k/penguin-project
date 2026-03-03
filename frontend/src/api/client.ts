@@ -19,7 +19,6 @@ export type Factor2VerifyResponse = {
 
 export type Factor3ChallengeResponse = {
   plaintext: string;
-  rotation: number;
 };
 
 export type Factor3VerifyResponse = {

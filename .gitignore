@@ -1,6 +1,25 @@
 dist
 .cursor/
-.obsidian/
+
+# Project notes
+notes/
+
+# macOS
+.DS_Store
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/dist-ssr/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+
+# Terraform
 .terraform/
 terraform/.terraform/
 *.tfstate

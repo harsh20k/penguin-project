@@ -80,10 +80,6 @@ export function Factor3Challenge({ token, onBackToLogin, onSuccess }: Factor3Cha
               <span className="field-label">Plaintext</span>
               <code className="code-pill">{challenge?.plaintext}</code>
             </div>
-            <div>
-              <span className="field-label">Rotation</span>
-              <code className="code-pill">{challenge?.rotation}</code>
-            </div>
           </div>
           <form className="form" onSubmit={handleSubmit}>
             <label className="field">

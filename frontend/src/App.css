@@ -209,6 +209,55 @@
   word-break: break-all;
 }
 
+.role-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.role-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.875rem 1rem;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.role-option input[type='radio'] {
+  margin-top: 0.2rem;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+}
+
+.role-option:hover {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 5%, transparent);
+}
+
+.role-option--selected {
+  border-color: var(--primary);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+}
+
+.role-option-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.role-option-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.role-option-desc {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
 @media (max-width: 600px) {
   .app-shell {
     padding: 1.5rem 1rem;
@@ -217,4 +266,66 @@
   .card {
     padding: 1.5rem 1.25rem 1.25rem;
   }
+}
+
+.homepage-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  text-align: center;
+}
+
+.success-icon {
+  font-size: 3.5rem;
+  color: #10b981;
+  margin: 0 auto;
+  width: 5rem;
+  height: 5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background-color: #ecfdf5;
+}
+
+.homepage-content .success-message {
+  font-size: 1.1rem;
+  color: #374151;
+  margin: 0;
+}
+
+.session-info {
+  padding: 1rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+  margin: 0.5rem 0;
+}
+
+.session-info .muted {
+  word-break: break-all;
+}
+
+.homepage-info {
+  text-align: left;
+  padding: 1.25rem;
+  background-color: #f9fafb;
+  border-radius: 0.5rem;
+}
+
+.homepage-info h3 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  color: #111827;
+}
+
+.homepage-info ul {
+  margin: 0;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
+.homepage-info li {
+  margin: 0.5rem 0;
+  color: #4b5563;
+  font-size: 0.95rem;
 }

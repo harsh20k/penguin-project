@@ -27,3 +27,13 @@ output "user_mfa_table_name" {
   description = "DynamoDB table name storing MFA metadata"
   value       = aws_dynamodb_table.user_mfa.name
 }
+
+output "frontend_bucket_name" {
+  description = "S3 bucket name for frontend static assets"
+  value       = aws_s3_bucket.frontend.id
+}
+
+output "frontend_website_url" {
+  description = "S3 website endpoint URL for the frontend"
+  value       = "http://${aws_s3_bucket_website_configuration.frontend.website_endpoint}"
+}

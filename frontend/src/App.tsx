@@ -1,19 +1,21 @@
 import { useState } from 'react';
 import { login, signup } from './api/client';
 import { LoginForm } from './components/LoginForm';
+import { SignupRoleStep } from './components/SignupRoleStep';
 import { SignupQuestionStep } from './components/SignupQuestionStep';
 import { SignupRotationStep, type SignupPayload } from './components/SignupRotationStep';
 import { Factor2Question } from './components/Factor2Question';
 import { Factor3Challenge } from './components/Factor3Challenge';
-import { StepLayout } from './components/StepLayout';
+import { Homepage } from './components/Homepage';
 import './App.css';
 
 type Step = 'login' | 'factor2' | 'factor3' | 'done';
-type SignupStep = 1 | 2 | 3;
+type SignupStep = 1 | 2 | 3 | 4;
 
 type SignupData = {
   email: string;
   password: string;
+  role?: 'client' | 'dispatch';
   question?: string;
   answer?: string;
   rotation?: number;
@@ -45,14 +47,14 @@ function App() {
   function handleSignupStart(data: { email: string; password: string }) {
     setSignupData({ ...data });
     setSignupMode(true);
-    setSignupStep(2);
+    setSignupStep(1);
   }
 
   async function handleCreateAccount(fullData: SignupPayload) {
     await signup({
       email: fullData.email,
       password: fullData.password,
-      role: 'client',
+      role: signupData.role ?? 'client',
       question: fullData.question,
       answer: fullData.answer,
       rotation: fullData.rotation,
@@ -70,15 +72,27 @@ function App() {
   }
 
   if (!token) {
+    if (signupMode && signupStep === 1) {
+      return (
+        <SignupRoleStep
+          initialRole={signupData.role}
+          onBack={() => {
+            setSignupMode(false);
+            setSignupStep(1);
+          }}
+          onNext={(role) => {
+            setSignupData((prev) => ({ ...prev, role }));
+            setSignupStep(2);
+          }}
+        />
+      );
+    }
     if (signupMode && signupStep === 2) {
       return (
         <SignupQuestionStep
           initialQuestion={signupData.question}
           initialAnswer={signupData.answer}
-          onBack={() => {
-            setSignupMode(false);
-            setSignupStep(1);
-          }}
+          onBack={() => setSignupStep(1)}
           onNext={(data) => {
             setSignupData((prev) => ({ ...prev, ...data }));
             setSignupStep(3);
@@ -128,26 +142,7 @@ function App() {
     );
   }
 
-  return (
-    <StepLayout
-      title="Authenticated"
-      subtitle="You have completed all three factors."
-      footer={
-        <button className="button primary" type="button" onClick={resetAll}>
-          Start over
-        </button>
-      }
-    >
-      <div className="success-message">
-        <p>Session established successfully.</p>
-        {sessionId && (
-          <p className="muted">
-            Session ID: <code>{sessionId}</code>
-          </p>
-        )}
-      </div>
-    </StepLayout>
-  );
+  return <Homepage sessionId={sessionId} onLogout={resetAll} />;
 }
 
 export default App;
